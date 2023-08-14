@@ -1,2 +1,4 @@
 # fllrig_scanner
-Scan frequency ranges and lists expoiting FLRIG xmlrpc
+Scan frequency ranges and lists exploiting FLRIG XML-RPC
+
+
