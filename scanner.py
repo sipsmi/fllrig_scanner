@@ -2,10 +2,6 @@ import xmlrpc.client
 import time
 import numpy as np
 from datetime import datetime
-import csv
-
-
-
 
 # Connect to the flrig server on localhost port 12345
 server_url = "http://localhost:12346"
@@ -16,14 +12,14 @@ current_freq = flrig.rig.get_vfo()
 print("Current frequency:", current_freq)
 smeter = flrig.rig.get_smeter()
 print("Current S Meter:",smeter)
-Sunits = flrig.rig.get_Sunits()
-print("Current S Units:",Sunits)
 
 # Set scanning config
 step_size = 12500
 sensitivity = 10
 delay = 0.02
 
+# read teh band information from teh cs - use header and this format:
+# band,low,high,mode,bw,sq
 bands = np.genfromtxt('scan1.csv', delimiter=',',dtype=[('band','U5'),
                 ('startFreq','i8'),('stopFreq','i8'),('mode','U5'),('ssize','i8'),('sens','i8')])
 
@@ -61,6 +57,7 @@ if band_choice == "":
         print("Current frequency is not in a supported band.")
         exit()
 else:
+    # see which band was selected
     for i in range(len(bands)):
         band = bands[i][0]
         startFreq = int(bands[i][1])
@@ -84,7 +81,7 @@ flrig.rig.set_mode(mode)
 while True:
     for freq in range(int(start_freq), int(end_freq), step_size):
         flrig.rig.set_vfo(float(freq))
-        freq = freq + step_size # was before above in oriinal code !
+
         time.sleep(delay)
 
         # check the sensitity
@@ -102,16 +99,8 @@ while True:
             if (tend - tstart) > 1.1:
                 elapsedStr = "{:.2f}".format((tend - tstart))
                 print(f"Signal {smeter} < {sensitivity} dB. Scaning restarted ({dt_string}) after {elapsedStr}S")
-
-            # end of the band reached, loop back to starting frequency
-            if float(freq) >= float(startFreq) and float(freq) <= float(stopFreq):
-            #start_freq = startFreq
-            #end_freq = stopFreq
-                pass
-            else:
-            # We are not in a supported band
-                print("Current frequency is not in a supported band.")
-                exit()
+      
+        freq = freq + step_size # was before above in oriinal code !
     #    continue
     # break out of the infinite loop when a signal is detected
     #break
