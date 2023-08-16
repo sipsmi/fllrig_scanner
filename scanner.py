@@ -8,16 +8,16 @@ from datetime import datetime
 server_url = "http://localhost:12346"
 flrig = xmlrpc.client.ServerProxy(server_url)
 version = flrig.main.get_version
-print("Connected to flrig {server_url}version:",version())
+print(f"G0FOZ Rig scanner-->flrig @{server_url} version:",version())
 current_freq = flrig.rig.get_vfo()
-print("Current frequency:", current_freq)
 smeter = flrig.rig.get_smeter()
-print("Current S Meter:",smeter)
+rinfo = flrig.rig.get_info()
+print("Current frequency:", current_freq, " S Meter:",smeter, " Info:",rinfo.replace('\n', ' ').replace('\r', ''))
 
 # Set scanning config
 step_size = 12500
 sensitivity = 10
-delay = 0.02
+delay = 0.01
 
 def sprint(*args, end='', **kwargs):
     sio = io.StringIO()
