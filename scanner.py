@@ -1,5 +1,6 @@
 import xmlrpc.client
 import time
+import io
 import numpy as np
 from datetime import datetime
 
@@ -17,6 +18,11 @@ print("Current S Meter:",smeter)
 step_size = 12500
 sensitivity = 10
 delay = 0.02
+
+def sprint(*args, end='', **kwargs):
+    sio = io.StringIO()
+    print(*args, **kwargs, end=end, file=sio)
+    return sio.getvalue()
 
 # read teh band information from teh cs - use header and this format:
 # band,low,high,mode,bw,sq
@@ -90,7 +96,7 @@ while True:
             tstart = time.time()
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            print(f"Signal {smeter} > {sensitivity} dB. Scan stopped ({dt_string}). Frequency ({band}) is {float( freq)/1000000.0}MHz")
+            sStr = sprint(f"Signal {smeter} > {sensitivity} dB. Scan stopped ({dt_string}). Frequency ({band}) is {float( freq)/1000000.0}MHz")
             while ( int(smeter) >= sensitivity ):
                 time.sleep(0.5)
                 smeter = flrig.rig.get_smeter()
@@ -98,6 +104,7 @@ while True:
             tend = time.time()
             if (tend - tstart) > 1.1:
                 elapsedStr = "{:.2f}".format((tend - tstart))
+                print(sStr)
                 print(f"Signal {smeter} < {sensitivity} dB. Scaning restarted ({dt_string}) after {elapsedStr}S")
       
         freq = freq + step_size # was before above in oriinal code !
