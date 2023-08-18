@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import xmlrpc.client
 import time
 import io
@@ -7,7 +8,19 @@ from datetime import datetime
 # Connect to the flrig server on localhost port 12345
 server_url = "http://localhost:12346"
 flrig = xmlrpc.client.ServerProxy(server_url)
-version = flrig.main.get_version
+try:
+    version = flrig.main.get_version
+    current_freq = flrig.rig.get_vfo()
+    smeter = flrig.rig.get_smeter()
+    rinfo = flrig.rig.get_info()
+    #print(flrig.system.listMethods())
+except xmlrpc.client.Fault as err:
+    print("A fault occurred")
+    print("Fault code: %d" % err.faultCode)
+    print("Fault string: %s" % err.faultString)
+    exit()
+
+
 print(f"G0FOZ Rig scanner-->flrig @{server_url} version:",version())
 current_freq = flrig.rig.get_vfo()
 smeter = flrig.rig.get_smeter()
@@ -19,6 +32,7 @@ step_size = 12500
 sensitivity = 10
 delay = 0.01
 
+# little routine to emulate sprintf
 def sprint(*args, end='', **kwargs):
     sio = io.StringIO()
     print(*args, **kwargs, end=end, file=sio)
@@ -100,7 +114,6 @@ while True:
             while ( int(smeter) >= sensitivity ):
                 time.sleep(0.5)
                 smeter = flrig.rig.get_smeter()
-            #time.sleep(5)
             tend = time.time()
             if (tend - tstart) > 1.1:
                 elapsedStr = "{:.2f}".format((tend - tstart))
@@ -108,6 +121,3 @@ while True:
                 print(f"Signal {smeter} < {sensitivity} dB. Scaning restarted ({dt_string}) after {elapsedStr}S")
       
         freq = freq + step_size # was before above in oriinal code !
-    #    continue
-    # break out of the infinite loop when a signal is detected
-    #break
